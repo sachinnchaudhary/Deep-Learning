@@ -1,1 +1,1 @@
-# Deep-learning
+### We will implement every single important thing of Deep Learning in this repository whether it's all major papers of deep learning, architecture like CNN, RNN, LSTM, Trasnformer or at core basic MLP, Gradient descent, all optimization algorithms and activation functions.
