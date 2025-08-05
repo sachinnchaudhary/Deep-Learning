@@ -1,5 +1,6 @@
 """This is 2.75 parameter vanilla nueral network which i trained on 55000+ tokens(i collecteed this data from various stories) i implemented this using only python and numpy without any libraries like pytorch. 
-    Sole aim of training this type of nueral network is to get foundational understanding that what is happening behind this neural network and to compute it without any libraries."""
+    Sole aim of training this type of nueral network is to get foundational understanding that what is happening behind this neural network and to compute it without any libraries.
+    and as it's for the understanding purpose it's not effective as such and have overfits but it's great for visulizing and build intuition around neural network."""
 
 
 
