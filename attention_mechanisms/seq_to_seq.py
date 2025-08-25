@@ -1,5 +1,17 @@
-"""This is the implementation of Seq to Seq paper by Ilya sutskever which is considered first effort for translation using neural network. Though the architecture for Seq to Seq uses LSTM(long short term memory)
-    But we implemented it using the GRU(gated recurrent unit)  I just want to test and understand the mechanism thus i have used very small dataset for training and not got good results but am about to implement using curated dataset"""
+"""This is the implementation of Seq to Seq paper by Ilya sutskever which is considered earlier effort for translation using neural network.
+   This implementation is good for getting intuition and even produce 2/3 output correct which is good for this much dataset :)
+   
+   Model's prediction:
+   English: hello world
+   French: bon matin
+
+   English: good morning
+   French: bon matin
+
+   English: how are you
+   French: comment allez vous"""
+
+
 
 eng_sentences = [
     ["hello", "world"],
@@ -49,16 +61,17 @@ print(f"French vocab: {len(fr_model.wv.key_to_index)} words")
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-class Gru(nn.Module):
+class SeqtoSeq(nn.Module):
+   
     def __init__(self, en_model, fr_model, hidden_size=100, num_layers=4):
-        super(Gru, self).__init__()
+        super(SeqtoSeq, self).__init__()
         
         self.en_model = en_model
         self.fr_model = fr_model
         self.hidden_size = hidden_size
         self.num_layers = num_layers
         
-        self.encoder = nn.GRU(
+        self.encoder =nn.LSTM(
             input_size=100, 
             hidden_size=self.hidden_size, 
             num_layers=self.num_layers, 
@@ -66,7 +79,7 @@ class Gru(nn.Module):
             bias=True
         )
         
-        self.decoder = nn.GRU(
+        self.decoder = nn.LSTM(
             input_size=100, 
             hidden_size=self.hidden_size, 
             num_layers=self.num_layers, 
@@ -82,14 +95,11 @@ class Gru(nn.Module):
         
         encoder_output, encoder_hidden = self.encoder(inword)
         
+        decoder_output, decoder_hidden = self.decoder(outword.to(torch.float32), encoder_hidden)
         
-        decoder_output, decoder_hidden = self.decoder(outword.to(torch.float32), encoder_hidden.to(torch.float32))
-        
-       
         logits = self.logits(decoder_output)
         
         return logits
-    
     
     def translate(self, english_sentence, max_length=10):
        
@@ -98,10 +108,8 @@ class Gru(nn.Module):
             
             eng_tensor = self.sentence_to_tensor(english_sentence, self.en_model)
             
-            
             encoder_output, encoder_hidden = self.encoder(eng_tensor)
             
-           
             decoder_input = torch.tensor([[self.get_embedding('<START>', self.fr_model)]], dtype= torch.float32)
             decoder_hidden = encoder_hidden
             
@@ -110,7 +118,6 @@ class Gru(nn.Module):
             for _ in range(max_length):
                 decoder_output, decoder_hidden = self.decoder(decoder_input, decoder_hidden)
                 logits = self.logits(decoder_output)
-                
                 
                 predicted_id = torch.argmax(logits, dim=-1).item()
                 predicted_word = self.id_to_word(predicted_id, self.fr_model)
@@ -124,7 +131,7 @@ class Gru(nn.Module):
                 decoder_input = torch.tensor([[self.get_embedding(predicted_word, self.fr_model)]], dtype= torch.float32)
             
             return result
-    
+        
     def sentence_to_tensor(self, sentence, model):
         
         embeddings = [self.get_embedding(word, model) for word in sentence]
@@ -192,14 +199,12 @@ def train_model():
     padded_decoder_inputs = pad_sequences(decoder_inputs)
     padded_targets = pad_sequences(targets, pad_value=-1)  
    
-    model = Gru(en_model, fr_model)
+    model = SeqtoSeq(en_model, fr_model)
     
    
     criterion = nn.CrossEntropyLoss(ignore_index=-1)  
     optimizer = torch.optim.Adam(model.parameters(), lr=0.001)
-    
-    
-    
+
     
     model.train()
     for epoch in range(1000):
@@ -232,6 +237,19 @@ test_sentences = [
 ]
 
 for eng_sent in test_sentences:
+    translation = trained_model.translate(eng_sent)
+    print(f"English: {' '.join(eng_sent)}")
+    print(f"French: {' '.join(translation)}")
+    print()    
+    
+
+    
+input = torch.tensor(en_model.wv[["hello", "world"]])
+output = torch.tensor(fr_model.wv[["<START>", "bonjour", "monde", "<END>"]])
+seq = SeqtoSeq(en_model, fr_model)
+
+print(seq.forward(input,output))
+
     translation = trained_model.translate(eng_sent)
     print(f"English: {' '.join(eng_sent)}")
     print(f"French: {' '.join(translation)}")
