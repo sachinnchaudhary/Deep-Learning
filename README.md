@@ -1,1 +1,1 @@
-### Along the way of my learning We will implement every single important thing of Deep Learning in this repository whether it's architecture like CNN, RNN, LSTM, Trasnformer or at core basic MLP, Gradient descent, all optimization algorithms and activation functions. 
+### Along the way of my learning We will implement every single important thing of Deep Learning in this repository whether it's architecture like CNN, RNN, LSTM, Trasnformer or at core basic MLP, Gradient descent, all optimization algorithms and activation functions or some ideas worth trying.
